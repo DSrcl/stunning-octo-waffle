@@ -9,6 +9,11 @@ from lxml import etree
 
 api = Flask(__name__)
 
+# TODO
+# * fix locking bug
+# * make `accept_url` async
+# * make the page look a bit nicer
+
 schema = fields.Schema(ts=fields.DATETIME(stored=True),
         user=fields.ID(stored=True),
         url=fields.ID(stored=True),
