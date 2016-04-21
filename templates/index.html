@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <title>History Search</title>
+  </head>
+  <body>
+	  <div>Search here</div>
+	  <form action="/search" method="get">
+		  <input type="hidden" name="user" value="tom"/>
+		  <input type="search" name="query"/>
+	  </form>
+	  <ul>
+		  {% for r in results %}
+		  <li>
+		  <div><a href="{{ r.url | safe }}">{{ r.url | safe }}</a><br/>
+			  {{ r.highlight|safe }}
+		  </div>
+		  </li>
+		  {% endfor %}
+	  </ul>
+  </body>
+</html>
