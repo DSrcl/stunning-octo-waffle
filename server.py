@@ -1,6 +1,7 @@
 from whoosh.index import create_in, open_dir
 from whoosh import fields
 from whoosh import query as wq
+from whoosh.writing import AsyncWriter
 import requests
 import os
 from flask import Flask, request, render_template
@@ -39,7 +40,7 @@ def parse(page):
 # download url and index it
 # TODO make this async
 def store_page(user, url):
-    writer = idx.writer()
+    writer = AsyncWriter(idx)
     resp = requests.get(url)
     content = parse(resp.content)
     now = datetime.now()

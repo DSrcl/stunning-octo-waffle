@@ -4,7 +4,8 @@ chrome.webNavigation.onCommitted.addListener(function(data) {
 	console.log(url);
 	var xhr = new XMLHttpRequest();
 	if (url != "about:blank" &&
-		url.indexOf("http://localhost:5000") === -1) {
+		url.indexOf("http://localhost:5000") === -1 &&
+    url.startsWith("http")) {
 		xhr.open("GET", "http://localhost:5000/links?user=tom&url="+url, true);
 		xhr.send();
 	}
