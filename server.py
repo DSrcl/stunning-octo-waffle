@@ -34,6 +34,9 @@ def parse(page):
     # filter out javascript code
     for tag in root.xpath('//script'):
         tag.getparent().remove(tag)
+    for tag in root.xpath('//style'):
+        tag.getparent().remove(tag)
+
     return unicode(''.join(root.itertext()))
 
 
@@ -49,8 +52,12 @@ def store_page(user, url):
 
 
 def make_query(user, query):
-    query = wq.And([wq.Term('content', query), wq.Term('user', user)])
-    return query
+    criteria = [wq.Term('user', user)]
+    if query is not None and query.strip() != '':
+        Terms = [wq.Term('content', term) for term in query.strip().split()]
+        criteria.append(wq.Or(Terms))
+    query = wq.And(criteria)
+    return query 
 
 
 @api.route('/links')
@@ -62,19 +69,27 @@ def accept_url():
 @api.route('/search')
 def search():
     results = []
-    if 'user' in request.args and 'query' in request.args:
-        with idx.searcher() as searcher:
-            query = make_query(request.args['user'], request.args['query'])
-            results = map(parse_result, searcher.search(query))
-    return render_template('index.html', results=results)
-    
+    with idx.searcher() as searcher:
+        query = make_query(request.args['user'], request.args.get('query'))
+        results = map(parse_result, searcher.search(query, limit=10000))
+    method_name = request.args.get('sortby', 'score')
+    sort_keys = {
+            'date': lambda r: r['date'],
+            'score': lambda r: r['score']
+            }
+    results.sort(key=sort_keys[method_name], reverse=True)
+    return render_template('index.html',
+            results=results,
+            byscore=(method_name=='score'),
+            query=request.args.get('query'))
 
 
 def parse_result(result): 
     return {
         'highlight': result.highlights('content'),
         'date': result['ts'],
-        'url': result['url']
+        'url': result['url'],
+        'score': result.score
         }
 
 
